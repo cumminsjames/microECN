@@ -1,5 +1,33 @@
 # microECN
 
+<p align="center">
+  <img
+    src="https://img.shields.io/badge/Rust-stable-orange?style=flat-square&logo=rust"
+    alt="Rust"
+  />
+  <a href="https://github.com/cumminsjames/microECN/blob/main/LICENSE">
+    <img
+      src="https://img.shields.io/github/license/cumminsjames/microECN?style=flat-square"
+      alt="Apache-2.0 License"
+    />
+  </a>
+</p>
+
+microECN is a tiny pedagogical ECN distilled into just [190 lines of Rust](https://github.com/cumminsjames/microECN/blob/main/src/lib.rs). Part educational tool, part art project, it reduces an electronic market to its irreducible core.
+
+## Contents
+
+- [Introduction](#introduction)
+- [What is an ECN?](#what-is-an-ecn)
+- [Data structures](#data-structures)
+- [Message protocol](#message-protocol)
+- [Matching engine](#matching-engine)
+- [Market data feed](#market-data-feed)
+- [Replays](#replays)
+- [License](#license)
+
+## Introduction
+
 Electronic communication networks (ECNs) are often large, complex systems. I wanted to strip an ECN back to its essentials and make it small enough that every moving part could be understood at a glance. The result is **microECN**: a compact, dependency-free Rust library. Rather than an exhaustive production system, microECN is an art project. Its purpose is not completeness, but clarity. It is an exploration of simplicity: a deliberately minimal system (only 190 lines in `lib.rs`!) that people can take apart, inspect, and truly understand from the inside out. Of course, a real-world ECN requires additional features and optimizations, and the gateway layer is intentionally outside the scope of this project. But as an educational tool, I hope microECN helps demystify how ECNs work while also providing a practical introduction to Rust. And, if I'm honest, I think there's something beautiful about reducing a complicated system to its irreducible core. With that in mind, let's walk through the project.
 
 ## What is an ECN?
@@ -79,3 +107,7 @@ append(w, ts, c, msg).map(|_| lob.handle(feed, ts, c, msg))
 ```
 
 This is the engine's version of "write it down before you do anything". Each log record contains fixed-width, little-endian fields: a 16-byte timestamp, a 4-byte client ID, and an 8-byte message, for a total size of 28 bytes. After appending the record, `receive` calls `sync_all` before making any changes to the in-memory book. If either the write or sync fails, the error is returned and the message is not applied. Replay uses the same matching logic as live operation. There is no separate reconstruction path. During recovery, each recorded message is loaded and passed through the same handler in the same order in which it was originally processed. Given a complete log whose writes were successfully persisted, this deterministically reconstructs the order book, execution reports, and market data feed by replaying the recorded history one message at a time.
+
+## License
+
+Apache-2.0 — see [LICENSE](LICENSE).
